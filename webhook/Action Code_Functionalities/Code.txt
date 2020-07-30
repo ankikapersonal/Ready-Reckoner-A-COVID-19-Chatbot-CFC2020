@@ -1,0 +1,1391 @@
+/**
+*
+* main() will be run when you invoke this action
+*
+* @param Cloud Functions actions accept a single parameter, which must be a JSON object.
+*
+* @return The output of this action, which must be a JSON object.
+*
+*/
+var request = require("request-promise");
+const DiscoveryV1 = require("watson-developer-cloud/discovery/v1");
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
+
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
+
+
+/* Main Start */
+
+async function main(params) {
+    
+    /* Global Level Case */
+    
+  if (params.type === "api") {
+    try {
+      const summary = await request({
+       method: "GET",
+        uri: "https://corona.lmao.ninja/v2/all",
+        json: true,
+      });
+      
+      
+      if (params.location) {
+      
+       
+       
+       /* State Level Case Start */
+       
+  
+       
+      const Indian_state_data = await request({
+        method: "GET",
+        uri: "https://covid-19india-api.herokuapp.com/v2.0/state_data",
+        json: true,
+      }); 
+
+ //var con_obj = Indian_state_data[1];
+ 
+                       for (var i = 0; i < Indian_state_data[1].state_data.length; i++)  {
+                       if (
+                           Indian_state_data[1].state_data[i].state.toLowerCase()===params.location.toLowerCase()
+                           ) 
+          
+           {
+            return {
+
+              result: `Total Cases: ${Indian_state_data[1].state_data[i].confirmed}\n
+              Total Death: ${Indian_state_data[1].state_data[i].deaths}\n
+              Death Rate: ${Indian_state_data[1].state_data[i].death_rate}\n
+              Total Recovered: ${Indian_state_data[1].state_data[i].recovered}\n
+              Recovered Rate: ${Indian_state_data[1].state_data[i].recovered_rate}\n
+              Total Active: ${Indian_state_data[1].state_data[i].active}\n
+              Active Rate: ${Indian_state_data[1].state_data[i].active_rate}\n\n
+              Source: https://www.mygov.in/covid-19/`
+        
+              
+             
+
+            }
+          }
+        }
+        
+             
+              
+          /* State Level Case End */    
+       
+       
+       
+       
+       /* District/City Level Case start */
+       
+       const district_Data = await request({
+        method: "GET",
+        uri: "https://api.covid19india.org/state_district_wise.json",
+        json: true,
+      });
+       
+
+          var state_obj;
+        var dist_obj  
+            
+        
+        for(var states in district_Data)
+         {
+             state_obj = (district_Data[states])
+             for(var district in state_obj.districtData)
+             {
+               // console.log(district)
+                
+             if(district.toLowerCase() ===
+              params.location.toLowerCase() )
+              {
+                  
+                  dist_obj = ((state_obj.districtData)[district])
+                  
+                  
+                  return {
+
+              result: `Total Cases: ${dist_obj.confirmed}\n
+              Total Deaths: ${dist_obj.deceased}\n
+              Death Rate: ${((dist_obj.deceased / dist_obj.confirmed)*100).toPrecision(3)}\n
+              Total Recovered: ${dist_obj.recovered}\n
+              Recovered Rate: ${((dist_obj.recovered / dist_obj.confirmed)*100).toPrecision(4)}\n
+              Total Active: ${dist_obj.active}\n
+              Active Rate: ${((dist_obj.active / dist_obj.confirmed)*100).toPrecision(4)}\n
+              \nSource: COVID19India MOHFW Gov. Org. and Media`,
+
+            };
+
+                  
+              } 
+              
+              
+         
+             }
+         }
+   
+
+   /* District/City Level Case end */
+   
+      /* US states Level Case start */
+      
+        const US_data = await request({
+        method: "GET",
+        uri: "https://corona.lmao.ninja/v2/states",
+        json: true,
+      });
+        
+        for (var i = 0; i < US_data.length; i++) {
+          if (
+            US_data[i].state.toLowerCase() ===
+              params.location.toLowerCase() 
+          ) {
+            return {
+
+              result: `Total Cases: ${US_data[i].cases}\n
+              Total Deaths: ${US_data[i].deaths}\n
+              Death Rate: ${((US_data[i].deaths / US_data[i].cases)*100).toPrecision(3)}\n
+              Total Recovered: ${(US_data[i].cases)-(US_data[i].deaths)-(US_data[i].active)}\n
+              Recovered Rate: ${((((US_data[i].cases)-(US_data[i].deaths)-(US_data[i].active)) / US_data[i].cases)*100).toPrecision(4)}\n
+              Active Cases: ${US_data[i].active}\n
+              Active Rate: ${((US_data[i].active / US_data[i].cases)*100).toPrecision(4)}\n
+              Today New Cases: ${US_data[i].todayCases}\n
+              Today New Deaths: ${US_data[i].todayDeaths}\n
+              Case Per Million: ${US_data[i].casesPerOneMillion}\n
+              Death Per Million: ${US_data[i].deathsPerOneMillion}\n
+              Total Tests: ${US_data[i].tests}\n
+              Test Per Million: ${US_data[i].testsPerOneMillion}\n
+              \nSource: Data from New York Times`,
+
+            };
+          }
+        }
+       
+          /* US states Level Case end */
+          
+             /* Country Level Case start */
+        
+         const country_data = await request({
+        method: "GET",
+        uri: "https://corona.lmao.ninja/v2/countries",
+        json: true,
+      
+      });
+      
+       
+        
+        for (var i = 0; i < country_data.length; i++) {
+          if (
+            country_data[i].country.toLowerCase() ===
+              params.location.toLowerCase() 
+          ) 
+          {
+            return {
+
+              result: `Total Cases: ${country_data[i].cases}\n
+              Total Deaths: ${country_data[i].deaths}\n
+              Death Rate: ${((country_data[i].deaths / country_data[i].cases)*100).toPrecision(3)}\n
+              Total Recovered: ${country_data[i].recovered}\n
+              Recovered Rate: ${((country_data[i].recovered / country_data[i].cases)*100).toPrecision(4)}\n
+              Active Cases: ${country_data[i].active}\n
+              Active Rate: ${((country_data[i].active / country_data[i].cases)*100).toPrecision(4)}\n
+              Today New Cases: ${country_data[i].todayCases}\nToday New Deaths: ${country_data[i].todayDeaths}\n
+              Today New Recovered: ${country_data[i].todayRecovered}\n
+              Critical Cases: ${country_data[i].critical}\nCase Per Million: ${country_data[i].casesPerOneMillion}\n
+              Death Per Million: ${country_data[i].deathsPerOneMillion}\nTotal Tests: ${country_data[i].tests}\n
+              Test Per Million: ${country_data[i].testsPerOneMillion}\nContinent: ${country_data[i].continent}\n
+              Active Per Million: ${country_data[i].activePerOneMillion}\n
+              Recovered Per Million: ${country_data[i].recoveredPerOneMillion}\nCritical Per Million: ${country_data[i].criticalPerOneMillion}\n
+              \nSource: Data from Worldometers`,
+              
+              
+
+            };
+          }
+        }
+           /* Country Level Case End */
+           
+              /* Continent/Region Level Case start */
+        
+           const region_data = await request({
+        method: "GET",
+        uri: "https://corona.lmao.ninja/v2/continents",
+        json: true,
+      });
+        
+        for (var i = 0; i < region_data.length; i++) {
+          if (
+            region_data[i].continent.toLowerCase() ===
+              params.location.toLowerCase() 
+          ) {
+            return {
+
+              result: `Total Cases: ${region_data[i].cases}\n
+              Total Deaths: ${region_data[i].deaths}\n
+              Death Rate: ${((region_data[i].deaths / region_data[i].cases)*100).toPrecision(3)}\n
+              Total Recovered: ${region_data[i].recovered}\n
+              Recovered Rate: ${((region_data[i].recovered / region_data[i].cases)*100).toPrecision(4)}\n
+              Active Cases: ${region_data[i].active}\n
+              Active Rate: ${((region_data[i].active / region_data[i].cases)*100).toPrecision(4)}\n
+              Today New Cases: ${region_data[i].todayCases}\nToday New Deaths: ${region_data[i].todayDeaths}\n
+              Today New Recovered: ${region_data[i].todayRecovered}\n
+              Critical Cases: ${region_data[i].critical}\nCase Per Million: ${region_data[i].casesPerOneMillion}\n
+              Death Per Million: ${region_data[i].deathsPerOneMillion}\nTotal Tests: ${region_data[i].tests}\n
+              Test Per Million: ${region_data[i].testsPerOneMillion}\nContinent: ${region_data[i].continent}\n
+              Active Per Million: ${region_data[i].activePerOneMillion}\n
+              Recovered Per Million: ${region_data[i].recoveredPerOneMillion}\nCritical Per Million: ${region_data[i].criticalPerOneMillion}\n
+              Countries: ${region_data[i].countries}\n
+              \nSource: Data from Worldometers`,
+
+            };
+          }
+        }
+        
+           /* Continent/Region Level Case end */
+        
+        return { error: "did not find location" };
+      }
+   
+      
+     // let totalCases = summary.Global.TotalConfirmed;
+     // let totalDeaths = summary.Global.TotalDeaths;
+      //let totalRecovered = summary.Global.TotalRecovered;
+      
+   
+      
+
+      return {
+        result: `Total Cases: ${summary.cases}\n
+        Total Deaths: ${summary.deaths}\n
+        Death Rate: ${((summary.deaths / summary.cases)*100).toPrecision(3)}\n
+        Total Recovered: ${summary.recovered}\n
+        Recovered Rate: ${((summary.recovered / summary.cases)*100).toPrecision(4)}\n
+        Active Cases: ${summary.active}\n
+        Active Rate: ${((summary.recovered / summary.cases)*100).toPrecision(4)}\n
+              Today New Cases: ${summary.todayCases}\nToday New Deaths: ${summary.todayDeaths}\n
+              Today New Recovered: ${summary.todayRecovered}\n
+              Critical Cases: ${summary.critical}\nCases Per Million: ${summary.casesPerOneMillion}\n
+              Deaths Per Million: ${summary.deathsPerOneMillion}\nTotal Tests: ${summary.tests}\n
+              Tests Per Million: ${summary.testsPerOneMillion}\nActive Per Million: ${summary.activePerOneMillion}\n
+              Recovered Per Million: ${summary.recoveredPerOneMillion}\nCritical Per Million: ${summary.criticalPerOneMillion}\n
+             No of Affected Countries: ${summary.affectedCountries}\n\nSource: Data from Worldometers\n`,
+      };
+    } catch (err) {
+      return { error: "it failed : " + err };
+    }
+  } 
+  
+  /* Global Level End and Type="api" code ends here */
+  
+  /* Helpline code start */
+  
+  if (params.type === "apicon") {
+    try {
+      const summary = await request({
+        method: "GET",
+        uri: "https://api.rootnet.in/covid19-in/contacts",
+        json: true,
+      });
+      
+      
+      
+        if (params.location) {
+      const helpline_data = await request({
+        method: "GET",
+        uri: "https://api.rootnet.in/covid19-in/contacts",
+        json: true,
+      });
+      
+      
+      var con_obj = helpline_data.data.contacts.regional;
+      
+         //console.log(con_obj)
+         
+          var arr = [];
+            for ( var a in con_obj)
+            {
+                arr.push(con_obj[a])
+                
+            }
+        
+      
+       
+       for (var i = 0; i < arr.length; i++) {
+          
+          if (
+            arr[i].loc.toLowerCase() ===
+              params.location.toLowerCase()
+          ) 
+          
+         
+          {
+            return {
+              result: `Helpline Number: ${arr[i].number}\n\n
+              Source: https://www.mohfw.gov.in`
+             
+            };
+          } 
+          
+       }
+}
+   
+       return {
+              result: `Here is the helpline for India \n
+              Number: ${summary.data.contacts.primary.number}\n
+              Number-TollFree: 1075\n
+              Email: ${summary.data.contacts.primary.email}\n
+              Twitter: ${summary.data.contacts.primary.twitter}\n
+              Facebook: ${summary.data.contacts.primary.facebook}\n
+              WhatsApp :Live Helpdesk\n
+              https://api.whatsapp.com/send?phone=919013151515&text=Hi&source=&data=&app_absent=\n
+              Source: https://www.mohfw.gov.in,
+              https://www.mygov.in/covid-19/`,
+            };
+    }
+     catch (err) {
+      return { error: "it failed : " + err };
+    }
+  }
+  
+  /* Helpline code end */
+  
+  /* Travel Advisory code start */
+  
+  if (params.type === "apitravel") {
+      
+      try {
+    
+const summary = await request({
+        method: "GET",
+        uri: "https://www.travel-advisory.info/api?countrycode=IN",
+       
+        json: true,
+     });
+      
+      var con_obj=summary.data
+        var arr = [];
+            for ( var a in con_obj)
+            {
+                arr.push(con_obj[a])
+                
+            }
+        //console.log(arr[0].name)
+  
+    
+         
+        
+       if (params.location) {
+          const traveladvisory_data = await request({
+        method: "GET",
+        uri: "https://www.travel-advisory.info/api",
+       
+        json: true,
+        
+    
+     });
+
+       var con_obj=traveladvisory_data.data
+        var arr = [];
+            for ( var a in con_obj)
+            {
+                arr.push(con_obj[a])
+                
+            }
+        //console.log(arr[0].name)
+  
+     for (var i = 0; i < arr.length; i++) {
+         
+          if (
+           arr[i].name.toLowerCase() ===
+            params.location.toLowerCase()
+
+          )  {
+         return {
+
+              result: `Continent for the mentioned country: ${arr[i].continent}\n
+              Advisory Score: ${arr[i].advisory.score}\n
+              Risk Level Description: ${arr[i].advisory.message}\n
+              Update as on: ${arr[i].advisory.updated}\n\n
+              Source: ${arr[i].advisory.source}\n`
+   
+            };
+          }
+          
+         
+       }
+
+}
+  return {
+
+              result: `Here is the travel advisory details for ${arr[0].name}\n 
+              Continent for the mentioned country: ${arr[0].continent}\n
+              Advisory Score: ${arr[0].advisory.score}\n
+              Risk Level Description: ${arr[0].advisory.message}\n
+              Update as on: ${arr[0].advisory.updated}\n\n
+              Source: ${arr[0].advisory.source}\n`
+   
+            };
+     
+    }
+     
+  catch (err) {
+      return { error: "it failed : " + err };
+  
+  }
+  }
+   
+  /* Travel Advisory Code ends here */
+  
+  /* Testing status code start */
+  
+   if (params.type === "apitest") {
+    try {
+      const summary= await request({
+        method: "GET",
+        uri: "https://api.covid19india.org/data.json",
+        json: true,
+      });
+      
+     
+        
+       if (params.location) {
+         const test_data1 = await request({
+        method: "GET",
+        uri: "https://api.covid19india.org/state_test_data.json",
+        json: true,
+     });
+         
+        var arr = []
+       for (var i = 0; i < test_data1.states_tested_data.length; i++) {
+       
+         if (
+           test_data1.states_tested_data[i].state.toLowerCase() ===
+            params.location.toLowerCase() 
+
+          )  { 
+               arr.push (test_data1.states_tested_data[i].updatedon)
+              
+            }
+            
+          }
+         
+        var dates = []
+        for (var i = 0 ; i < arr.length ; i++)
+        {
+           
+           var arrsplit = arr[i].split("/");
+           dates.push ( arrsplit[1] + "/" + arrsplit[0] + "/" + arrsplit[2])
+           
+        }
+       
+       
+       function max_date(all_dates) {
+        var max_dt = all_dates[0],
+          max_dtObj = new Date(all_dates[0]);
+          
+        for(var dt = 1 ; dt < all_dates.length ; dt++ )
+          {
+          
+          if (  new Date(all_dates[dt]) > max_dtObj)
+          {
+          max_dt = all_dates[dt];
+          max_dtObj = new Date(all_dates[dt]);
+          
+          }
+          }
+          ;
+         return max_dt;
+          }
+        //console.log(max_date(dates))
+  
+      
+        for (var i = 0; i < test_data1.states_tested_data.length; i++) {
+           
+           
+         if (
+           test_data1.states_tested_data[i].state.toLowerCase() ===
+            params.location.toLowerCase() 
+            //&& test_data1.states_tested_data[i].updatedon === max_date(dates) 
+
+          ) 
+           {
+           var uosplit = test_data1.states_tested_data[i].updatedon.split("/");
+           var uos =   uosplit[1] + "/" + uosplit[0] + "/" + uosplit[2]
+           //console.log(uos)
+           
+            if (uos === max_date(dates) )
+           { 
+              return {
+              
+              result: `
+              Total Samples Tested: ${test_data1.states_tested_data[i].totaltested}\n
+              Test Per Million:${test_data1.states_tested_data[i].testspermillion}\n
+              Test Per Thuosand:${test_data1.states_tested_data[i].testsperthousand}\n
+              Positive: ${test_data1.states_tested_data[i].positive}\n
+              Negetive:${test_data1.states_tested_data[i].negative}\n
+              Positivity Rate: ${test_data1.states_tested_data[i].testpositivityrate}\n
+              Test Per Positive Cases:${test_data1.states_tested_data[i].testsperpositivecase}\n
+              Total People Currently Quarantine: ${test_data1.states_tested_data[i].totalpeoplecurrentlyinquarantine}\n
+              Total People Released From Quarantine: ${test_data1.states_tested_data[i].totalpeoplereleasedfromquarantine}\n
+              People in ICU:${test_data1.states_tested_data[i].peopleinicu}\n
+              People on Ventilators:${test_data1.states_tested_data[i].peopleonventilators}\n
+              Total PPE: ${test_data1.states_tested_data[i].totalppe}\n
+              Total N95 Masks: ${test_data1.states_tested_data[i].totaln95masks}\n
+              Unconfirmed:${test_data1.states_tested_data[i].unconfirmed}\n
+              Source:${test_data1.states_tested_data[i].source1} \n
+              \n ${test_data1.states_tested_data[i].source2}`
+           
+            }
+              
+            }
+           }
+            
+          }
+}
+
+ //console.log(summary1.tested)
+      
+      var arr = []
+       for (var i = 0; i < summary.tested.length; i++) {
+       
+          { 
+               arr.push (summary.tested[i].updatetimestamp)
+              
+            }
+            
+          }
+      
+       var dates = []
+        for (var i = 0 ; i < arr.length ; i++)
+        {
+           
+           var arrsplit = arr[i].split("/");
+           dates.push ( arrsplit[1] + "/" + arrsplit[0] + "/" + arrsplit[2])
+           
+        }
+        
+        function max_date(all_dates) {
+        var max_dt = all_dates[0],
+          max_dtObj = new Date(all_dates[0]);
+          
+        for(var dt = 1 ; dt < all_dates.length ; dt++ )
+          {
+          
+          if (  new Date(all_dates[dt]) > max_dtObj)
+          {
+          max_dt = all_dates[dt];
+          max_dtObj = new Date(all_dates[dt]);
+          
+          }
+          }
+          ;
+         return max_dt;
+          }
+        
+        for (var i = 0; i < summary.tested.length; i++) {
+           
+           {
+           var uosplit = summary.tested[i].updatetimestamp.split("/");
+           var uos =   uosplit[1] + "/" + uosplit[0] + "/" + uosplit[2]
+           }
+           
+        
+           //console.log(uos)
+ if (uos === max_date(dates) )
+           { 
+              return {
+              
+              result: `As of today we have the below information for INDIA 
+              Total Samples Tested: ${summary.tested[i].totalsamplestested}\n
+              Positive Cases From Samples Reported: ${summary.tested[i].positivecasesfromsamplesreported}\n
+              Individual Tested Per Confirmed Case: ${summary.tested[i].individualstestedperconfirmedcase}\n
+              Test Per Million:${summary.tested[i].testspermillion}\n
+              Test Per Confirmed Case:${summary.tested[i].testsperconfirmedcase}\n
+              Total Positive Cases: ${summary.tested[i].totalpositivecases}\n
+              Positivity Rate: ${summary.tested[i].testpositivityrate}\n
+            Total Individual Tested: ${summary.tested[i].totalindividualstested}\n
+            Sample Reported Today: ${summary.tested[i].samplereportedtoday}\n
+              Source:${summary.tested[i].source} \n
+              \n ${summary.tested[i].source1}`
+           
+            }
+              
+            }
+   
+        }
+     
+    } catch (err) {
+      return { error: "it failed : " + err };
+    }
+  }
+  
+  
+    /* Testing status code end */
+    
+    /* Hospital Code Start */
+    
+  var hospital_json=[{"id":0,"country":"India","hospitals":{"public":25778,"private":43487},"beds":{"public":713986,"private":1185242},"icu":{"public":35699,"private":59262},"ventilators":{"public":17850,"private":29631}},{"id":1,"state":"Lakshadweep","hospitals":{"public":9,"private":4},"beds":{"public":300,"private":126},"icu":{"public":15,"private":6},"ventilators":{"public":8,"private":3}}
+,{"id":2,"state":"Chandigarh","hospitals":{"public":9,"private":4},"beds":{"public":3756,"private":1875},"icu":{"public":188,"private":94},"ventilators":{"public":94,"private":47}},
+{"id":3,"state":"Dadra & N Haveli","hospitals":{"public":12,"private":6},"beds":{"public":619,"private":322},"icu":{"public":31,"private":16},"ventilators":{"public":15,"private":8}},
+{"id":4,"state":"Puducherry","hospitals":{"public":14,"private":6},"beds":{"public":3569,"private":1603},"icu":{"public":178,"private":80},"ventilators":{"public":89,"private":40}},
+{"id":5,"state":"Daman & Diu","hospitals":{"public":5,"private":21},"beds":{"public":240,"private":1010},"icu":{"public":12,"private":51},"ventilators":{"public":6,"private":25}},
+{"id":6,"state":"Andaman Nicobar Islands","hospitals":{"public":30,"private":6},"beds":{"public":1075,"private":219},"icu":{"public":54,"private":11},"ventilators":{"public":27,"private":5}},
+{"id":7,"state":"Manipur","hospitals":{"public":30,"private":8},"beds":{"public":1427,"private":363},"icu":{"public":71,"private":18},"ventilators":{"public":36,"private":9}},
+{"id":8,"state":"Sikkim","hospitals":{"public":33,"private":8},"beds":{"public":1560,"private":392},"icu":{"public":78,"private":20},"ventilators":{"public":39,"private":10}},
+{"id":9,"state":"Nagaland","hospitals":{"public":36,"private":13},"beds":{"public":1880,"private":681},"icu":{"public":94,"private":34},"ventilators":{"public":47,"private":17}},
+{"id":10,"state":"Goa","hospitals":{"public":43,"private":22},"beds":{"public":3012,"private":1572},"icu":{"public":151,"private":79},"ventilators":{"public":75,"private":39}},
+{"id":11,"state":"Mizoram","hospitals":{"public":90,"private":23},"beds":{"public":1997,"private":499},"icu":{"public":100,"private":25},"ventilators":{"public":50,"private":12}},
+{"id":12,"state":"Jammu & Kashmir","hospitals":{"public":143,"private":14},"beds":{"public":7291,"private":704},"icu":{"public":365,"private":35},"ventilators":{"public":182,"private":18}},
+{"id":13,"state":"Tripura","hospitals":{"public":156,"private":8},"beds":{"public":4429,"private":238},"icu":{"public":365,"private":35},"ventilators":{"public":182,"private":18}},
+{"id":14,"state":"Delhi","hospitals":{"public":109,"private":67},"beds":{"public":24383,"private":15072},"icu":{"public":1219,"private":754},"ventilators":{"public":610,"private":377}},
+{"id":15,"state":"Meghalaya","hospitals":{"public":157,"private":28},"beds":{"public":4457,"private":787},"icu":{"public":223,"private":39},"ventilators":{"public":111,"private":20}},
+{"id":16,"state":"Arunachal Pradesh","hospitals":{"public":218,"private":20},"beds":{"public":2404,"private":220},"icu":{"public":120,"private":11},"ventilators":{"public":60,"private":6}},
+{"id":17,"state":"Chattisgarh","hospitals":{"public":214,"private":182},"beds":{"public":9412,"private":8018},"icu":{"public":471,"private":401},"ventilators":{"public":235,"private":200}},
+{"id":18,"state":"Andhra Pradesh","hospitals":{"public":258,"private":670},"beds":{"public":23138,"private":60092},"icu":{"public":1157,"private":3005},"ventilators":{"public":578,"private":1502}},
+{"id":19,"state":"Madhya Pradesh","hospitals":{"public":465,"private":506},"beds":{"public":31106,"private":33833},"icu":{"public":1555,"private":1692},"ventilators":{"public":778,"private":846}},
+{"id":20,"state":"Himachal Pradesh","hospitals":{"public":801,"private":235},"beds":{"public":12399,"private":3641},"icu":{"public":620,"private":182},"ventilators":{"public":310,"private":91}},
+{"id":21,"state":"Uttarakhand","hospitals":{"public":460,"private":829},"beds":{"public":8512,"private":15331},"icu":{"public":426,"private":767},"ventilators":{"public":213,"private":383}},
+{"id":22,"state":"Jharkhand","hospitals":{"public":555,"private":809},"beds":{"public":10784,"private":15712},"icu":{"public":539,"private":786},"ventilators":{"public":270,"private":393}},
+{"id":23,"state":"Gujarat","hospitals":{"public":438,"private":970},"beds":{"public":20172,"private":44690},"icu":{"public":1009,"private":2234},"ventilators":{"public":504,"private":1117}},
+{"id":24,"state":"Assam","hospitals":{"public":1226,"private":503},"beds":{"public":17142,"private":7036},"icu":{"public":857,"private":352},"ventilators":{"public":429,"private":176}},
+{"id":25,"state":"Haryana","hospitals":{"public":668,"private":1480},"beds":{"public":11240,"private":24901},"icu":{"public":562,"private":1245},"ventilators":{"public":281,"private":623}},
+{"id":26,"state":"West Bengal","hospitals":{"public":1566,"private":697},"beds":{"public":78566,"private":34969},"icu":{"public":3928,"private":1748},"ventilators":{"public":1964,"private":874}},
+{"id":27,"state":"Punjab","hospitals":{"public":682,"private":1638},"beds":{"public":17933,"private":43064},"icu":{"public":897,"private":2153},"ventilators":{"public":448,"private":1077}},
+{"id":28,"state":"Tamil Nadu","hospitals":{"public":1217,"private":1222},"beds":{"public":77532,"private":77843},"icu":{"public":3877,"private":3892},"ventilators":{"public":1938,"private":1946}},
+{"id":29,"state":"Odisha","hospitals":{"public":1806,"private":695},"beds":{"public":18519,"private":7131},"icu":{"public":926,"private":357},"ventilators":{"public":463,"private":178}},
+{"id":30,"state":"Bihar","hospitals":{"public":1147,"private":1887},"beds":{"public":11664,"private":19193},"icu":{"public":583,"private":960},"ventilators":{"public":292,"private":480}},
+{"id":31,"state":"Maharashtra","hospitals":{"public":711,"private":2492},"beds":{"public":51446,"private":180293},"icu":{"public":2572,"private":9015},"ventilators":{"public":1286,"private":4507}},
+{"id":32,"state":"Kerala","hospitals":{"public":1280,"private":2062},"beds":{"public":38004,"private":61223},"icu":{"public":1900,"private":3061},"ventilators":{"public":950,"private":1531}},
+{"id":33,"state":"Telengana","hospitals":{"public":863,"private":3247},"beds":{"public":20983,"private":78936},"icu":{"public":1049,"private":3947},"ventilators":{"public":525,"private":1973}},
+{"id":34,"state":"Rajasthan","hospitals":{"public":2850,"private":2794},"beds":{"public":47054,"private":46122},"icu":{"public":2353,"private":2306},"ventilators":{"public":1176,"private":1153}},
+{"id":35,"state":"Karnataka","hospitals":{"public":2842,"private":7842},"beds":{"public":69721,"private":192388},"icu":{"public":3486,"private":9619},"ventilators":{"public":1743,"private":4810}},
+{"id":36,"state":"Uttar Pradesh","hospitals":{"public":4635,"private":12468},"beds":{"public":76260,"private":205142},"icu":{"public":3813,"private":10257},"ventilators":{"public":1907,"private":5129}}]
+
+
+if(params.type === "hospital")
+      {
+          try
+          {
+          if(params.location)
+          {
+              
+              for(var i = 1; i < hospital_json.length; i++)
+              {
+                  
+                  if(hospital_json[i].state.toLowerCase() === params.location.toLowerCase())
+                  {
+                      
+                       return {
+                      result: `
+              Public Hospitals:${hospital_json[i].hospitals.public}\n
+              Private Hospitals:${hospital_json[i].hospitals.private}\n
+              Total Hospitals:${hospital_json[i].hospitals.public + hospital_json[i].hospitals.private}\n
+               Public Hospital Beds:${hospital_json[i].beds.public}\n
+             Private Hospital Beds:${hospital_json[i].beds.private}\n
+                       Total Beds:${hospital_json[i].beds.public + hospital_json[i].beds.private}\n
+                       Public ICU:${hospital_json[i].icu.public}\n
+                       Private ICU:${hospital_json[i].icu.private}\n
+                       Total ICU:${hospital_json[i].icu.public + hospital_json[i].icu.private}\n
+                       Public Ventilators:${hospital_json[i].ventilators.public}\n
+                       Private Ventilators:${hospital_json[i].ventilators.private}\n
+                       Total Ventilators:${hospital_json[i].ventilators.public + hospital_json[i].ventilators.private}\n\n
+                       Source:https://cddep.org/wp-content/uploads/2020/04/State-wise-estimates-of-current-beds-and-ventilators_24Apr2020.pdf`,
+              
+                      
+                  }
+             }
+                  
+                  
+              }
+              
+              
+              
+              
+          }
+          
+          
+       return {
+
+              
+
+              result: `
+              Public Hospitals:${hospital_json[0].hospitals.public}\n
+              Private Hospitals:${hospital_json[0].hospitals.private}\n
+              Total Hospitals:${hospital_json[0].hospitals.public + hospital_json[0].hospitals.private}\n
+               Public Hospital Beds:${hospital_json[0].beds.public}\n
+             Private Hospital Beds:${hospital_json[0].beds.private}\n
+                       Total Beds:${hospital_json[0].beds.public + hospital_json[0].beds.private}\n
+                       Public ICU:${hospital_json[0].icu.public}\n
+                       Private ICU:${hospital_json[0].icu.private}\n
+                       Total ICU:${hospital_json[0].icu.public + hospital_json[0].icu.private}\n
+                       Public Ventilators:${hospital_json[0].ventilators.public}\n
+                       Private Ventilators:${hospital_json[0].ventilators.private}\n
+                       Total Ventilators:${hospital_json[0].ventilators.public + hospital_json[0].ventilators.private}\n\n
+                       Source:https://cddep.org/wp-content/uploads/2020/04/State-wise-estimates-of-current-beds-and-ventilators_24Apr2020.pdf`,
+              
+             
+         
+      
+      };
+      
+     }
+catch (err) {
+      return { error: "it failed : " + err };
+}
+}
+
+  /* Hospital Code End */
+  
+  
+  /* Top 5 Code Start */
+  
+    if (params.type === "Top 5 Cases") {
+  const summary = await request({
+        method: "GET",
+        uri: "https://corona.lmao.ninja/v2/countries",
+        json: true,
+      });
+        
+      
+          var unsortedArray = [];
+         
+
+        // Push each JSON Object entry in array by [key, value]
+          for(var i in summary)
+          {
+            unsortedArray.push([summary[i].country , summary[i].cases]);
+          
+          }
+          //console.log(unsortedArray)  
+          
+          
+          
+    //let bubbleSort = (inputArr) => {
+    let len = unsortedArray.length;
+    for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len-1; j++) {
+            if (unsortedArray[j][1] <unsortedArray[j + 1][1]) {
+                let tmp = unsortedArray[j];
+                unsortedArray[j] = unsortedArray[j + 1];
+                unsortedArray[j + 1] = tmp;
+            }
+        }
+    }
+    
+    var res =""
+    for (var keys = 0 ; keys < 5 ; keys++ ) 
+    {
+    res = res + unsortedArray[keys][0] +  " Confirmed Cases: " + unsortedArray[keys][1] + "\n";
+    
+    }
+    return { result: `Top 5 countries with most number of COVID-19 cases:\n` + res + `Source: Data from Worldometers\n`,};
+
+  
+
+    }
+  
+  
+
+  if (params.type === "Top 5 Deaths") {
+  const summary = await request({
+        method: "GET",
+        uri: "https://corona.lmao.ninja/v2/countries",
+        json: true,
+      });
+        
+      
+          var unsortedArray = [];
+         
+
+        // Push each JSON Object entry in array by [key, value]
+          for(var i in summary)
+          {
+            unsortedArray.push([summary[i].country , summary[i].deaths]);
+          
+          }
+          //console.log(unsortedArray)  
+          
+          
+          
+    //let bubbleSort = (inputArr) => {
+    let len = unsortedArray.length;
+    for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len-1; j++) {
+            if (unsortedArray[j][1] <unsortedArray[j + 1][1]) {
+                let tmp = unsortedArray[j];
+                unsortedArray[j] = unsortedArray[j + 1];
+                unsortedArray[j + 1] = tmp;
+            }
+        }
+    }
+    
+    var res =""
+    for (var keys = 0 ; keys < 5 ; keys++ ) 
+    {
+    res = res + unsortedArray[keys][0] +  " Confirmed Deaths: " + unsortedArray[keys][1] + "\n";
+    
+    }
+    return { result: `Top 5 countries with most number of COVID-19 deaths:\n` + res + `Source: Data from Worldometers\n`,};
+
+  
+
+
+
+    }
+    
+   
+   
+   if (params.type === "Top 5 Cases IND State") {
+  const summary = await request({
+        method: "GET",
+        uri: "https://covid-19india-api.herokuapp.com/v2.0/state_data",
+        json: true,
+      }); 
+
+        
+      
+          var unsortedArray = [];
+         
+
+        // Push each JSON Object entry in array by [key, value]
+          for(var i in summary[1].state_data)
+          {
+             
+            unsortedArray.push([summary[1].state_data[i].state , summary[1].state_data[i].confirmed]);
+          
+          }
+          //console.log(unsortedArray)  
+          
+          
+          
+    //let bubbleSort = (inputArr) => {
+    let len = unsortedArray.length;
+    for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len-1; j++) {
+            if (unsortedArray[j][1] <unsortedArray[j + 1][1]) {
+                let tmp = unsortedArray[j];
+                unsortedArray[j] = unsortedArray[j + 1];
+                unsortedArray[j + 1] = tmp;
+            }
+        }
+    }
+    
+    var res =""
+    for (var keys = 0 ; keys < 5 ; keys++ ) 
+    {
+    res = res + unsortedArray[keys][0] +  " Confirmed Cases: " + unsortedArray[keys][1] + "\n";
+    
+    }
+    return { result: `Top 5 indian states with most number of COVID-19 cases:\n` + res + `Source: https://www.mygov.in/covid-19/\n`,};
+
+  
+
+
+
+    }
+    
+    if (params.type === "Top 5 Deaths IND State") {
+   const summary = await request({
+        method: "GET",
+        uri: "https://covid-19india-api.herokuapp.com/v2.0/state_data",
+        json: true,
+      }); 
+
+        
+      
+          var unsortedArray = [];
+         
+
+        // Push each JSON Object entry in array by [key, value]
+          for(var i in summary[1].state_data)
+          {
+            unsortedArray.push([summary[1].state_data[i].state , summary[1].state_data[i].deaths]);
+          
+          }
+          //console.log(unsortedArray)  
+          
+          
+          
+    //let bubbleSort = (inputArr) => {
+    let len = unsortedArray.length;
+    for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len-1; j++) {
+            if (unsortedArray[j][1] <unsortedArray[j + 1][1]) {
+                let tmp = unsortedArray[j];
+                unsortedArray[j] = unsortedArray[j + 1];
+                unsortedArray[j + 1] = tmp;
+            }
+        }
+    }
+    
+    var res =""
+    for (var keys = 0 ; keys < 5 ; keys++ ) 
+    {
+    res = res + unsortedArray[keys][0] +  " Confirmed Deaths: " + unsortedArray[keys][1] + "\n";
+    
+    }
+    return { result: `Top 5 indian states with most number of COVID-19 deaths:\n` + res + `Source: https://www.mygov.in/covid-19/\n`,};
+
+  
+
+
+
+    }
+    
+    
+    if (params.type=== "Top 5 Cases IND City") {  
+    const summary = await request({
+        method: "GET",
+        uri: "https://api.covid19india.org/state_district_wise.json",
+        json: true,
+      });
+       
+      var state_obj;
+        var dist_obj  
+            
+          var unsortedArray = [];
+         
+
+        // Push each JSON Object entry in array by [key, value]
+          for(var states in summary)
+          {
+                             state_obj = (summary[states])
+                           
+for(var district in state_obj.districtData)
+{
+     if(district !== "Unknown" && district !=="Unassigned")
+    {
+dist_obj = ((state_obj.districtData)[district])
+            unsortedArray.push([district, dist_obj.confirmed]);
+    }
+    } 
+          
+       
+          }
+    
+    let len = unsortedArray.length;
+    for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len-1; j++) {
+            if (unsortedArray[j][1] < unsortedArray[j + 1][1] ) {
+               let tmp = unsortedArray[j];
+                unsortedArray[j] = unsortedArray[j + 1];
+                unsortedArray[j + 1] = tmp;
+            }
+        }
+    }
+    
+    var res =""
+    for (var keys = 0 ; keys < 5 ; keys++ ) 
+    {
+    res = res + unsortedArray[keys][0] +  "  Confirmed Cases: " + unsortedArray[keys][1] + "\n";
+    
+    }
+    return { result: `Top 5 Indian City with most number of COVID-19 cases:\n` + res,};
+    
+    }    
+
+
+   if (params.type=== "Top 5 Deaths IND City") {  
+    const summary = await request({
+        method: "GET",
+        uri: "https://api.covid19india.org/state_district_wise.json",
+        json: true,
+      });
+       
+      var state_obj;
+        var dist_obj  
+            
+          var unsortedArray = [];
+         
+
+        // Push each JSON Object entry in array by [key, value]
+          for(var states in summary)
+          {
+                             state_obj = (summary[states])
+                           
+for(var district in state_obj.districtData)
+{
+     if(district !== "Unknown" && district !=="Unassigned")
+    {
+dist_obj = ((state_obj.districtData)[district])
+            unsortedArray.push([district, dist_obj.deceased]);
+    }
+    } 
+          
+       
+          }
+    
+    let len = unsortedArray.length;
+    for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len-1; j++) {
+            if (unsortedArray[j][1] < unsortedArray[j + 1][1] ) {
+               let tmp = unsortedArray[j];
+                unsortedArray[j] = unsortedArray[j + 1];
+                unsortedArray[j + 1] = tmp;
+            }
+        }
+    }
+    
+    var res =""
+    for (var keys = 0 ; keys < 5 ; keys++ ) 
+    {
+    res = res + unsortedArray[keys][0] +  "  Confirmed Deaths: " + unsortedArray[keys][1] + "\n";
+    
+    }
+    return { result: `Top 5 Indian City with most number of COVID-19 deaths:\n` + res,};
+    
+    }
+    
+    
+    /* Top 5 Code end */
+    
+    
+    /* Bottom 5 Code Start */
+  
+    if (params.type === "Bottom 5 Cases") {
+  const summary = await request({
+        method: "GET",
+        uri: "https://corona.lmao.ninja/v2/countries",
+        json: true,
+      });
+        
+      
+          var unsortedArray = [];
+         
+
+        // Push each JSON Object entry in array by [key, value]
+          for(var i in summary)
+          {
+            unsortedArray.push([summary[i].country , summary[i].cases]);
+          
+          }
+          //console.log(unsortedArray)  
+          
+          
+          
+    //let bubbleSort = (inputArr) => {
+    let len = unsortedArray.length;
+    for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len-1; j++) {
+            if (unsortedArray[j][1] >unsortedArray[j + 1][1]) {
+                let tmp = unsortedArray[j];
+                unsortedArray[j] = unsortedArray[j + 1];
+                unsortedArray[j + 1] = tmp;
+            }
+        }
+    }
+    
+    var res =""
+    for (var keys = 0 ; keys < 5 ; keys++ ) 
+    {
+    res = res + unsortedArray[keys][0] +  " Confirmed Cases: " + unsortedArray[keys][1] + "\n";
+    
+    }
+    return { result: `Bottom 5 countries with least number of COVID-19 cases:\n` + res + `Source: Data from Worldometers\n`,};
+
+  
+
+    }
+  
+  
+
+  if (params.type === "Bottom 5 Deaths") {
+  const summary = await request({
+        method: "GET",
+        uri: "https://corona.lmao.ninja/v2/countries",
+        json: true,
+      });
+        
+      
+          var unsortedArray = [];
+         
+
+        // Push each JSON Object entry in array by [key, value]
+          for(var i in summary)
+          {
+            unsortedArray.push([summary[i].country , summary[i].deaths]);
+          
+          }
+          //console.log(unsortedArray)  
+          
+          
+          
+    //let bubbleSort = (inputArr) => {
+    let len = unsortedArray.length;
+    for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len-1; j++) {
+            if (unsortedArray[j][1] >unsortedArray[j + 1][1]) {
+                let tmp = unsortedArray[j];
+                unsortedArray[j] = unsortedArray[j + 1];
+                unsortedArray[j + 1] = tmp;
+            }
+        }
+    }
+    
+    var res =""
+    for (var keys = 0 ; keys < 5 ; keys++ ) 
+    {
+    res = res + unsortedArray[keys][0] +  " Confirmed Deaths: " + unsortedArray[keys][1] + "\n";
+    
+    }
+    return { result: `Bottom 5 countries with least number of COVID-19 deaths:\n` + res + `Source: Data from Worldometers\n`,};
+
+  
+
+
+
+    }
+    
+   
+   
+   if (params.type === "Bottom 5 Cases IND State") {
+   const summary = await request({
+        method: "GET",
+        uri: "https://covid-19india-api.herokuapp.com/v2.0/state_data",
+        json: true,
+      }); 
+
+        
+      
+          var unsortedArray = [];
+         
+
+        // Push each JSON Object entry in array by [key, value]
+          for(var i in summary[1].state_data)
+          {
+             unsortedArray.push([summary[1].state_data[i].state , summary[1].state_data[i].confirmed]);
+          
+          }
+          //console.log(unsortedArray)  
+          
+          
+          
+    //let bubbleSort = (inputArr) => {
+    let len = unsortedArray.length;
+    for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len-1; j++) {
+            if (unsortedArray[j][1] >unsortedArray[j + 1][1]) {
+                let tmp = unsortedArray[j];
+                unsortedArray[j] = unsortedArray[j + 1];
+                unsortedArray[j + 1] = tmp;
+            }
+        }
+    }
+    
+    var res =""
+    for (var keys = 0 ; keys < 5 ; keys++ ) 
+    {
+    res = res + unsortedArray[keys][0] +  " Confirmed Cases: " + unsortedArray[keys][1] + "\n";
+    
+    }
+    return { result: `Bottom 5 indian states with least number of COVID-19 cases:\n` + res + `Source: https://www.mygov.in/covid-19/\n`,};
+
+  
+
+
+
+    }
+    
+    if (params.type === "Bottom 5 Deaths IND State") {
+  const summary = await request({
+        method: "GET",
+        uri: "https://covid-19india-api.herokuapp.com/v2.0/state_data",
+        json: true,
+      }); 
+
+        
+      
+          var unsortedArray = [];
+         
+
+        // Push each JSON Object entry in array by [key, value]
+          for(var i in summary[1].state_data)
+          {
+           unsortedArray.push([summary[1].state_data[i].state , summary[1].state_data[i].deaths]);
+          
+          }
+          //console.log(unsortedArray)  
+          
+          
+          
+    //let bubbleSort = (inputArr) => {
+    let len = unsortedArray.length;
+    for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len-1; j++) {
+            if (unsortedArray[j][1] >unsortedArray[j + 1][1]) {
+                let tmp = unsortedArray[j];
+                unsortedArray[j] = unsortedArray[j + 1];
+                unsortedArray[j + 1] = tmp;
+            }
+        }
+    }
+    
+    var res =""
+    for (var keys = 0 ; keys < 5 ; keys++ ) 
+    {
+    res = res + unsortedArray[keys][0] +  " Confirmed Deaths: " + unsortedArray[keys][1] + "\n";
+    
+    }
+    return { result: `Bottom 5 indian states with least number of COVID-19 deaths:\n` + res + `Source: https://www.mygov.in/covid-19/\n`,};
+
+  
+
+
+
+    }
+    
+    
+    if (params.type=== "Bottom 5 Cases IND City") {  
+    const summary = await request({
+        method: "GET",
+        uri: "https://api.covid19india.org/state_district_wise.json",
+        json: true,
+      });
+       
+      var state_obj;
+        var dist_obj  
+            
+          var unsortedArray = [];
+         
+
+        // Push each JSON Object entry in array by [key, value]
+          for(var states in summary)
+          {
+                             state_obj = (summary[states])
+                           
+for(var district in state_obj.districtData)
+{
+     if(district !== "Unknown" && district !=="Unassigned")
+    {
+dist_obj = ((state_obj.districtData)[district])
+            unsortedArray.push([district, dist_obj.confirmed]);
+    }
+    } 
+          
+       
+          }
+    
+    let len = unsortedArray.length;
+    for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len-1; j++) {
+            if (unsortedArray[j][1] > unsortedArray[j + 1][1] ) {
+               let tmp = unsortedArray[j];
+                unsortedArray[j] = unsortedArray[j + 1];
+                unsortedArray[j + 1] = tmp;
+            }
+        }
+    }
+    
+    var res =""
+    for (var keys = 0 ; keys < 5 ; keys++ ) 
+    {
+    res = res + unsortedArray[keys][0] +  "  Confirmed Cases: " + unsortedArray[keys][1] + "\n";
+    
+    }
+    return { result: `Bottom 5 Indian City with least number of COVID-19 cases:\n` + res,};
+    
+    }    
+
+
+   if (params.type=== "Bottom 5 Deaths IND City") {  
+    const summary = await request({
+        method: "GET",
+        uri: "https://api.covid19india.org/state_district_wise.json",
+        json: true,
+      });
+       
+      var state_obj;
+        var dist_obj  
+            
+          var unsortedArray = [];
+         
+
+        // Push each JSON Object entry in array by [key, value]
+          for(var states in summary)
+          {
+                             state_obj = (summary[states])
+                           
+for(var district in state_obj.districtData)
+{
+     if(district !== "Unknown" && district !=="Unassigned")
+    {
+dist_obj = ((state_obj.districtData)[district])
+            unsortedArray.push([district, dist_obj.deceased]);
+    }
+    } 
+          
+       
+          }
+    
+    let len = unsortedArray.length;
+    for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len-1; j++) {
+            if (unsortedArray[j][1] > unsortedArray[j + 1][1] ) {
+               let tmp = unsortedArray[j];
+                unsortedArray[j] = unsortedArray[j + 1];
+                unsortedArray[j + 1] = tmp;
+            }
+        }
+    }
+    
+    var res =""
+    for (var keys = 0 ; keys < 5 ; keys++ ) 
+    {
+    res = res + unsortedArray[keys][0] +  "  Confirmed Deaths: " + unsortedArray[keys][1] + "\n";
+    
+    }
+    return { result: `Bottom 5 Indian City with least number of COVID-19 deaths:\n` + res,};
+    
+    }
+    
+    
+    /* Bottom 5 Code end */
+    
+    /* Discovery Invoked */
+    
+  else {
+    const discovery = new DiscoveryV1({
+      version: "2019-03-25",
+      iam_apikey: params.api_key,
+      url: params.url,
+    });
+
+    const offset = getRandomInt(50);
+
+    const queryParams = {
+      environment_id: params.env_id,
+      collection_id: params.collection_id,
+      natural_language_query:
+        "corona virus " + params.input || "corona virus news",
+      count: 3,
+      offset: offset,
+    };
+    try {
+      data = await discovery.query(queryParams);
+      let response = data.results.map((v, i) => {
+        return `${v.title}
+                 ${v.text}
+                 ${v.url}`;
+      });
+      return {
+        result:
+          "Here are some news articles we found. We can’t verify the accuracy of all of these sources.\n\n" +
+          response.join("\n\n"),
+      };
+    } catch (err) {
+      return { error: "it failed : " + err };
+    }
+    
+  }
+  
+  /* Discovery End */
+}
+
+/* Main End */
+

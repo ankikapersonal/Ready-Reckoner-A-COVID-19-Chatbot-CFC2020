@@ -1,4 +1,4 @@
-# Read-Reckoner-A-COVID-19-Chatbot-CFC2020
+# Ready-Reckoner-A-COVID-19-Chatbot-CFC2020
 Problem Statement :
 In times of crisis, communications systems are often overwhelmed with people trying to find basic information about testing, symptoms, community response, and other resources. When communication lines get clogged, people who need real help can't get through. Chatbots help respond to tens, even hundreds, of thousands of messages a day.
 

@@ -1,0 +1,6 @@
+applications:
+- name: Ready_Reckoner_For_Covid_19
+  command: npm start
+  path: .
+  memory: 128M
+  instances: 1
